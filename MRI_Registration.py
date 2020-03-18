@@ -36,7 +36,7 @@ def translation(image,tx,ty):
   translated = cv2.warpAffine(image,M,(cols,rows))
   return translated
 
-def getvalues(image): ##retrieve the data contained in the middle column and row of the image.
+def get_values(image): ##retrieve the data contained in the middle column and row of the image.
   rows,cols= image.shape
   T=np.zeros((1,rows+cols))
   for i in range(rows):
@@ -49,7 +49,7 @@ def add_noise(vect1D,mag,size):
   vect1D+=np.random.uniform(-1*mag, 1*mag,size)
   return(vect1D)
 
-def create_bdd(path_img,path_bdd,txmin,txmax,Ntx,tymin,tymax,Nty,thetamin,thetamax,Ntheta):
+def create_dataset(path_img,path_bdd,txmin,txmax,Ntx,tymin,tymax,Nty,thetamin,thetamax,Ntheta):
   ## definition of translation and rotation step
   if Ntx!=0:
     pas_tx=float(txmax-txmin)/float(Ntx)
@@ -84,7 +84,7 @@ def create_bdd(path_img,path_bdd,txmin,txmax,Ntx,tymin,tymax,Nty,thetamin,thetam
         copy=img #copies the input image to avoid modifying it.
 
         temporaire=translation(rotate(copy,thetamin+O*pas_theta),txmin+X*pas_tx,tymin+Y*pas_ty) #returns transformed image.
-        set[compteur,:]=getvalues(temporaire) #the middle column and row of the transformed image is fed to the dataset.
+        set[compteur,:]=get_values(temporaire) #the middle column and row of the transformed image is fed to the dataset.
         
         #Label matrix is populated.
         labels[compteur,0]=txmin+X*pas_tx
@@ -98,7 +98,7 @@ def create_bdd(path_img,path_bdd,txmin,txmax,Ntx,tymin,tymax,Nty,thetamin,thetam
   joblib.dump(labels,path_bdd+'/labels606060CRTL.saved')
   
 #Example on how to call the function: 
-#create_bdd(os.getcwd() + '/bdd/CTRL_alc_M1_t2_1_sans_NaN.saved',os.getcwd() + '/bdd',-30,30,60,-30,30,60,-30,30,60)
+#create_dataset(os.getcwd() + '/bdd/CTRL_alc_M1_t2_1_sans_NaN.saved',os.getcwd() + '/bdd',-30,30,60,-30,30,60,-30,30,60)
 
 def get_fit(path_bdd,path_labels): #Generates the model from the the data and labels
 
@@ -151,7 +151,7 @@ def predict(path_regr,path_img_test,N_tests): #Perfoms the predictions based on 
     
     #A prediction of the transformation is made and stored
     t1=time.time()
-    prediction[i,:]=regr.predict(getvalues(translation(rotate(copy,theta),x,y)))
+    prediction[i,:]=regr.predict(get_values(translation(rotate(copy,theta),x,y)))
     t2=time.time()
     
     deltax=abs(x-prediction[i,0])
@@ -208,7 +208,7 @@ def noisy_predict(path_regr,path_img_test,N_tests,mag): #realise des predictions
     
     #A prediction is made and stored. The addnoise function is used.
     t1=time.time()
-    prediction[i,:]=regr.predict(add_noise(getvalues(translation(rotate(copy,theta),x,y)),mag,rows+cols))
+    prediction[i,:]=regr.predict(add_noise(get_values(translation(rotate(copy,theta),x,y)),mag,rows+cols))
     t2=time.time()
 
     deltax=abs(x-prediction[i,0])
