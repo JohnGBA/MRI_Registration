@@ -94,11 +94,11 @@ This concludes that it is not viable to determine the acquisition plans using Kn
 
 ## How to use
 
-Download the atlas image **allenBrainAtlas.nii** and the acquisition image **CTRL_alc_M1_t2_1.nii**.
-Use delete_NaN() to remove NaN values of your image block.
-Call create_dataset() passing the path to the one of the images downloaded. 
-Call get_fit() passing the dataset and labels to get the model.
-Call predict() passing the model and a test image.
+Download the atlas image **allenBrainAtlas.nii** and the acquisition image **CTRL_alc_M1_t2_1.nii**.\
+Use delete_NaN() to remove NaN values of your image block.\
+Call create_dataset() passing the path to the one of the images downloaded.\
+Call get_fit() passing the dataset and labels to get the model.\
+Call predict() passing the model and a test image.\
 Call draw_plots() to visualize accuracy and error curves. 
 
 
