@@ -9,7 +9,7 @@ import time
 from sklearn.ensemble import RandomForestRegressor
 
 def delete_NaN():
-  img_=nib.load(os.getcwd() + 'bdd/CTRL_alc_M1_t2_1.nii')
+  img_=nib.load(os.getcwd() + '/CTRL_alc_M1_t2_1.nii')
   img= img_.get_fdata()
   copy=img
   C=0 #number of NaN values in image.
@@ -21,7 +21,7 @@ def delete_NaN():
           C=C+1
           copy[i,j,k]=0
           
-  joblib.dump(copy, os.getcwd() + 'bdd/CTRL_alc_M1_t2_1_sans_NaN.saved')
+  joblib.dump(copy, os.getcwd() + '/CTRL_alc_M1_t2_1_sans_NaN.saved')
   return(C)
 
 def rotate(image, angle):
@@ -49,7 +49,7 @@ def add_noise(vect1D,mag,size):
   vect1D+=np.random.uniform(-1*mag, 1*mag,size)
   return(vect1D)
 
-def create_dataset(path_img,path_bdd,txmin,txmax,Ntx,tymin,tymax,Nty,thetamin,thetamax,Ntheta):
+def create_dataset(path_img,path_dataset,txmin,txmax,Ntx,tymin,tymax,Nty,thetamin,thetamax,Ntheta):
   ## definition of translation and rotation step
   if Ntx!=0:
     pas_tx=float(txmax-txmin)/float(Ntx)
@@ -94,33 +94,33 @@ def create_dataset(path_img,path_bdd,txmin,txmax,Ntx,tymin,tymax,Nty,thetamin,th
         compteur+=1
 
   #The two matrices are stored in disk
-  joblib.dump(set,path_bdd+'/bdd606060CRTL.saved')
-  joblib.dump(labels,path_bdd+'/labels606060CRTL.saved')
+  joblib.dump(set,path_dataset+'/dataset606060CRTL.saved')
+  joblib.dump(labels,path_dataset+'/labels606060CRTL.saved')
   
 #Example on how to call the function: 
-#create_dataset(os.getcwd() + '/bdd/CTRL_alc_M1_t2_1_sans_NaN.saved',os.getcwd() + '/bdd',-30,30,60,-30,30,60,-30,30,60)
+#create_dataset(os.getcwd() + '/dataset/CTRL_alc_M1_t2_1_sans_NaN.saved',os.getcwd() + '/dataset',-30,30,60,-30,30,60,-30,30,60)
 
-def get_fit(path_bdd,path_labels): #Generates the model from the the data and labels
+def get_fit(path_dataset,path_labels): #Generates the model from the the data and labels
 
-  bdd=joblib.load(path_bdd)
+  dataset=joblib.load(path_dataset)
   labels=joblib.load(path_labels)
 
   ### ### ### PART TO CHANGE IN THE EVENT OF A CHANGE IN REGRESSION METHOD. NOW RANDOM FOREST IS USED. FOR OTHER METHODS, REFER TO SK-LEARN
   t1=time.time()
   regr = RandomForestRegressor(n_estimators=20, random_state=0)
-  regr.fit(bdd,labels)
+  regr.fit(dataset,labels)
   t2=time.time()
   
   print('R^2=')
-  print(regr.score(bdd,labels))
+  print(regr.score(dataset,labels))
   ### ### ###
 
   #The model is stored in disk.
-  joblib.dump(regr, os.getcwd() + '/random_forest/bdd/fit_CRTL.saved')
+  joblib.dump(regr, os.getcwd() + '/random_forest/dataset/fit_CRTL.saved')
   print(t2-t1)
 
 #Example on how to call the function: 
-#get_fit(os.getcwd() + '/random_forest/bdd/bdd606060.saved', os.getcwd() + '/random_forest/bdd/labels606060.saved')
+#get_fit(os.getcwd() + '/random_forest/dataset/dataset606060.saved', os.getcwd() + '/random_forest/dataset/labels606060.saved')
 
 def predict(path_regr,path_img_test,N_tests): #Perfoms the predictions based on the provided model.
 
@@ -176,7 +176,7 @@ def predict(path_regr,path_img_test,N_tests): #Perfoms the predictions based on 
   print(V,N_tests,float(V)/float(N_tests),'erreurs en x, y et theta '+str(erreur_moy_x)+', '+str(erreur_moy_y)+', '+str(erreur_moy_theta),'temps moyen de prediction '+str(temps_moy))
   
 #Example on how to call the function: 
-#predict(os.getcwd() + 'random_forest/bdd/fit.saved','os.getcwd() + '/random_forest/bdd/CTRL_alc_M1_t2_1.nii_sans_NaN.saved',1)    
+#predict(os.getcwd() + 'random_forest/dataset/fit.saved','os.getcwd() + '/random_forest/dataset/CTRL_alc_M1_t2_1.nii_sans_NaN.saved',1)    
 
 def noisy_predict(path_regr,path_img_test,N_tests,mag): #realise des predictions a partir du modele fourni en ajoutant du bruit uniforme d'amplitude mag
 
@@ -233,7 +233,7 @@ def noisy_predict(path_regr,path_img_test,N_tests,mag): #realise des predictions
   return([float(V)/float(N_tests),erreur_moy_x,erreur_moy_y,erreur_moy_theta])
   print(V,N_tests,float(V)/float(N_tests),'erreurs en x, y et theta '+str(erreur_moy_x)+', '+str(erreur_moy_y)+', '+str(erreur_moy_theta),'temps moyen de prediction '+str(temps_moy))
 
-def print_courbes(): #print curves which displays error and accuracy as a function of the amplitude of the noise added
+def draw_plots(): #print curves which displays error and accuracy as a function of the amplitude of the noise added
   X=np.zeros((1,21))
   Y=np.zeros((1,21))
   T=np.zeros((1,21))
@@ -241,8 +241,7 @@ def print_courbes(): #print curves which displays error and accuracy as a functi
   A=np.zeros((1,21))  #Noise 
   for k in range(0,1050,50):
     #with suppress_stdout():
-      #res=noisy_predict('C:/Projet_2A/Projet_2A_random_forest/bdd/fit_50.saved','C:/Projet_2A/Projet_2A_random_forest/bdd/CTRL_alc_M1_t2_1_onto_allen_sans_NaN.saved',1000,k)
-      res=noisy_predict(os.getcwd() + '/random_forest/bdd/fit_CRTL.saved', os.getcwd() + '/bdd/CTRL_alc_M1_t2_1_sans_NaN.saved',1000,k)
+      res=noisy_predict(os.getcwd() + '/random_forest/dataset/fit_CRTL.saved', os.getcwd() + '/dataset/CTRL_alc_M1_t2_1_sans_NaN.saved',1000,k)
       V[0,k//50]=res[0]
       X[0,k//50]=res[1]
       Y[0,k//50]=res[2]
