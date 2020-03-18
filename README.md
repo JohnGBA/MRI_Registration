@@ -99,7 +99,7 @@ Use delete_NaN() to remove NaN values of your image block.\
 Call create_dataset() passing the path to the one of the images downloaded.\
 Call get_fit() passing the dataset and labels to get the model.\
 Call predict() passing the model and a test image.\
-Call draw_plots() to visualize accuracy and error curves. 
+Call draw_plots() to visualize the accuracy and error curves. 
 
 
 
